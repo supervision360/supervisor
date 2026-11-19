@@ -14,3 +14,6 @@ log_reportes.txt
 Dashboard_*.html
 auth.js
 meses.json
+
+# Paginas de prueba: nunca se publican
+prueba_*.html

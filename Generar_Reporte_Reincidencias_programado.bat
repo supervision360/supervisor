@@ -82,6 +82,20 @@ if errorlevel 1 (
     msg "%USERNAME%" "Informes COBRA: fallo generando el Portal Supervisor (se publica solo el Portal de Tecnicos). Revisa log_reportes.txt"
 )
 
+REM Portada nueva de la operacion (desde el 19-11-2026): Mi Equipo por zonas y agencias, Detalle por
+REM tecnico, Produccion (INF de Francisco Flores) y Revision FACT mensual. Reemplaza index.html,
+REM produccion.html y fact.html que acaba de dejar generar.js. Si falla, quedan las de generar.js.
+if "%FALLO_GEN_SUP%"=="0" (
+    echo Generando portada de la operacion...
+    node "C:\Bases_Tigo\portal-supervisor\herramientas\prueba_norte.js" publicar
+    if errorlevel 1 (
+        echo AVISO: fallo la portada de la operacion; se publican las paginas anteriores.
+        node "%REG%" portada_operacion ERROR "fallo la portada de la operacion (quedan las paginas de generar.js)"
+    ) else (
+        node "%REG%" portada_operacion OK "portada de la operacion generada"
+    )
+)
+
 echo.
 echo ========================================================
 echo   Publicando en GitHub Pages...

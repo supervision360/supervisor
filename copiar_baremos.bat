@@ -21,7 +21,10 @@ if not exist "%ORIGEN%\INF-*.xlsx" (
 )
 
 REM robocopy reintenta si Excel tiene el archivo abierto un momento (/R:3 /W:3).
-robocopy "%ORIGEN%" "%DESTINO%" "INF-*.xlsx" /R:3 /W:3 /NJH /NJS /NDL /NP /NC /NS >nul
+REM Solo los INF de Punta Arenas: en la misma carpeta llega desde nov-2026 el INF de toda COBRA
+REM ("INF-11 Produccion EECC Cobra MSA ..."), que no tiene la hoja BASE_MES_ PUNTA_ARENAS; si se
+REM copiara, el portal lo tomaria como el INF del mes y quedaria sin productividad.
+robocopy "%ORIGEN%" "%DESTINO%" "INF-*PUNTA ARENAS*.xlsx" /R:3 /W:3 /NJH /NJS /NDL /NP /NC /NS >nul
 if %ERRORLEVEL% GEQ 8 (
     echo AVISO: no se pudo copiar el INF a baremosTigo (archivo en uso o sin acceso^).
     echo El portal usara la ultima copia disponible.

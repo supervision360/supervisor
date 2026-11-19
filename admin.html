@@ -29,6 +29,9 @@
   .vistas{ display:flex; flex-wrap:wrap; gap:4px; margin-top:20px; border-bottom:2px solid var(--line); }
   .vistas a{ padding:11px 18px; margin-bottom:-2px; font:600 12px/1.2 var(--font); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); text-decoration:none; border-bottom:2px solid transparent; }
   .vistas a:hover{ color:var(--navy); }
+  .vistas a .nueva{ display:inline-block; min-width:18px; padding:1px 6px; margin-left:6px; border-radius:9px; background:var(--amber); color:#3a2a00; font:700 11px/1.5 var(--font); letter-spacing:0; text-align:center; }
+  .alerta-banner{ display:none; margin:0 0 18px; padding:11px 14px; border-left:3px solid var(--amber); background:#fdf1d8; color:#5c4300; font-size:14px; }
+  .alerta-banner a{ color:#5c4300; font-weight:700; }
   .vistas a.activa{ color:var(--navy); border-bottom-color:var(--amber); }
   .vista{ display:none; }
   .vista.activa{ display:block; }
@@ -124,7 +127,9 @@
       <a href="#usuarios" data-vista="usuarios">Usuarios</a>
       <a href="#supervisores" data-vista="supervisores">Ingresos de supervisores</a>
       <a href="#tecnicos" data-vista="tecnicos">Ingresos de técnicos</a>
+      <a href="#alertas" data-vista="alertas">Alertas<span class="nueva" id="contAlertas" style="display:none"></span></a>
     </nav>
+    <div class="alerta-banner" id="bannerAlertas" role="status"></div>
 
     <section class="vista" data-vista="usuarios">
     <h2>Nuevo <strong>usuario</strong></h2>
@@ -178,6 +183,19 @@
       <p class="explica" id="pieTecnicos" style="margin:12px 0 0;"></p>
     </div>
 
+    </section>
+
+    <section class="vista" data-vista="alertas">
+    <h2><strong>Alertas</strong> del portal</h2>
+    <p class="explica">Aviso cuando aparece un técnico nuevo en la base (o una agencia que no está configurada). Se revisa cada vez que el portal se actualiza. Al marcarlas como vistas dejan de contarse arriba.</p>
+    <div class="panel">
+      <div class="filtros"><button type="button" class="sec" id="btnVistas" style="padding:10px 14px;">Marcar todas como vistas</button></div>
+      <table>
+        <thead><tr><th>Fecha</th><th>Hora</th><th>Aviso</th><th>Estado</th></tr></thead>
+        <tbody id="tablaAlertas"></tbody>
+      </table>
+      <p class="explica" id="pieAlertas" style="margin:12px 0 0;"></p>
+    </div>
     </section>
 
     <section class="vista" data-vista="supervisores">
@@ -353,6 +371,7 @@ const DIAS_REGISTRO = 30;
 let masAntiguo = null;
 // Un supervisor entra a esta pagina solo para ver los ingresos de los tecnicos.
 let soloTecnicos = false;
+let alertas = [];
 let tecnicos = null; // null = Supabase aun no tiene el registro de tecnicos
 let token = null, yo = null, usuarios = [], ingresos = [];
 
@@ -388,6 +407,8 @@ async function cargar() {
       { nombre: 'TECNICO DE EJEMPLO DOS', supervisor: 'SUPERVISOR A', agencia: 'SANTIAGO', ultimo: new Date(Date.now() - 12 * 86400000).toISOString(), ingresos_30: 2, dias_30: 2 },
       { nombre: 'TECNICO DE EJEMPLO TRES', supervisor: 'SUPERVISOR B', agencia: 'V REGION', ultimo: null, ingresos_30: 0, dias_30: 0 },
     ];
+    alertas = [{ id: 2, creada: new Date(Date.now() - 3600000).toISOString(), tipo: 'tecnico_nuevo', texto: 'Técnico nuevo: TECNICO DE EJEMPLO CUATRO (ARICA, Zona 1)', vista: false },
+      { id: 1, creada: new Date(Date.now() - 4 * 86400000).toISOString(), tipo: 'tecnico_nuevo', texto: 'Técnico nuevo: TECNICO DE EJEMPLO CINCO (IQUIQUE, Zona 1)', vista: true }];
     pintar(); return; }
   if (soloTecnicos) {
     const rs = await Acceso.rpc('resumen_tecnicos', {}, token);
@@ -405,6 +426,8 @@ async function cargar() {
   masAntiguo = v.ok && v.datos.length ? v.datos[0].fecha : null;
   const rt = await Acceso.rpc('resumen_tecnicos', {}, token);
   tecnicos = rt.ok && Array.isArray(rt.datos) ? rt.datos : null;
+  const al = await Acceso.leer('alertas_admin?select=id,creada,tipo,texto,vista&order=creada.desc&limit=200', token);
+  alertas = al.ok && Array.isArray(al.datos) ? al.datos : [];   // sin la tabla (06_alertas_admin.sql) queda vacio
   pintar();
 }
 
@@ -455,6 +478,7 @@ function hacerOrdenable(idCuerpo) {
 ['tablaUsuarios', 'tablaTecnicos', 'tablaIngresos'].forEach(hacerOrdenable);
 
 function pintar() {
+  pintarAlertas();
   const ultimo = {};
   for (const g of ingresos) if (g.resultado === 'ok' && !ultimo[g.usuario]) ultimo[g.usuario] = g.fecha;
   $('tablaUsuarios').innerHTML = usuarios.map((u) => {
@@ -486,6 +510,20 @@ function pintar() {
   const hayAntiguos = masAntiguo && new Date(masAntiguo) < corteAntiguos();
   $('avisoAntiguos').style.display = hayAntiguos ? 'block' : 'none';
   if (hayAntiguos) $('textoAntiguos').textContent = 'Hay registros de más de un mes (desde el ' + fmtFecha.format(new Date(masAntiguo)) + '). Puedes descargarlos a un archivo y borrarlos del sistema.';
+}
+
+function pintarAlertas() {
+  const nuevas = alertas.filter((a) => !a.vista).length;
+  const c = $('contAlertas'); c.textContent = nuevas; c.style.display = nuevas ? 'inline-block' : 'none';
+  const b = $('bannerAlertas');
+  b.innerHTML = nuevas ? '<b>' + nuevas + (nuevas === 1 ? ' alerta nueva' : ' alertas nuevas') + '.</b> ' + esc(alertas.find((a) => !a.vista).texto) + ' &nbsp;<a href="#alertas">Ver alertas</a>' : '';
+  b.style.display = nuevas ? 'block' : 'none';
+  $('tablaAlertas').innerHTML = alertas.length ? alertas.map((a) => {
+    const d = new Date(a.creada);
+    return '<tr><td>' + fmtFecha.format(d) + '</td><td>' + fmtHora.format(d) + '</td><td>' + esc(a.texto) + '</td><td>' + (a.vista ? 'Vista' : '<b>Nueva</b>') + '</td></tr>';
+  }).join('') : '<tr><td colspan="4">Sin alertas.</td></tr>';
+  $('btnVistas').disabled = !nuevas;
+  $('pieAlertas').textContent = alertas.length ? alertas.length + ' alerta' + (alertas.length === 1 ? '' : 's') + ' (las últimas 200).' : '';
 }
 
 function tecnicosFiltrados() {
@@ -631,13 +669,19 @@ for (const id of ['fUsuario', 'fDesde', 'fResultado']) $(id).addEventListener('c
 
 function mostrarVista() {
   const pedida = location.hash.replace('#', '');
-  const vista = soloTecnicos ? 'tecnicos' : ['usuarios', 'supervisores', 'tecnicos'].includes(pedida) ? pedida : 'usuarios';
+  const vista = soloTecnicos ? 'tecnicos' : ['usuarios', 'supervisores', 'tecnicos', 'alertas'].includes(pedida) ? pedida : 'usuarios';
   for (const el of document.querySelectorAll('.vista, .vistas a')) el.classList.toggle('activa', el.dataset.vista === vista);
 }
 window.addEventListener('hashchange', mostrarVista);
 mostrarVista();
 
 for (const id of ['tSupervisor', 'tEstado']) $(id).addEventListener('change', pintarTecnicos);
+
+$('btnVistas').addEventListener('click', async () => {
+  if (!CFG.prueba) { const r = await Acceso.rpc('alertas_marcar_vistas', {}, token); if (!r.ok) { alert('No se pudo marcar (' + r.estado + ').'); return; } }
+  alertas.forEach((a) => { a.vista = true; });
+  pintarAlertas();
+});
 
 $('btnCsvTecnicos').addEventListener('click', () => {
   bajarCsv([['Técnico', 'Supervisor', 'Agencia', 'Último ingreso', 'Ingresos (30 días)', 'Días con ingreso (30 días)']].concat(tecnicosFiltrados().map((t) => [

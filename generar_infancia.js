@@ -147,7 +147,7 @@ function cargarNpsPorTecnico() {
     const total = candidatos.reduce((a, c) => a + c.total, 0);
     const p = candidatos.reduce((a, c) => a + c.P, 0);
     const d = candidatos.reduce((a, c) => a + c.D, 0);
-    resultado[key] = total ? +(((p - d) / total) * 100).toFixed(1) : null;
+    resultado[key] = total ? +(((p - d) / total) * 100).toFixed(2) : null;
   });
   return resultado;
 }
@@ -377,7 +377,7 @@ async function main() {
   }
 
   est.mergeCells('A1:F1');
-  estilizarTitulo(est.getCell('A1'), 'TASA DE AVERIAS DE INFANCIA (%) — Meta: no superar el ' + (META * 100).toFixed(1) + '%');
+  estilizarTitulo(est.getCell('A1'), 'TASA DE AVERIAS DE INFANCIA (%) — Meta: no superar el ' + (META * 100).toFixed(2) + '%');
   est.getRow(1).height = 24;
 
   est.addRow([]);
@@ -582,7 +582,7 @@ async function main() {
     '- Filas resaltadas en ROJO en "Infancia Detalle": la reparacion de infancia la atendio el MISMO tecnico que instalo (posible senal de instalacion mal hecha).',
     '- "Dias hasta Infancia": dias transcurridos entre la instalacion y la reparacion de infancia (campo q_dias_infancia del archivo origen).',
     '',
-    'Hoja "Estadistica": tasa de averias de infancia (averias / total de instalaciones) calculada Global, por Agencia, por Producto y por Tecnico Instalador. Meta: no superar el ' + (META * 100).toFixed(1) + '%. Verde = cumple la meta, Rojo = no cumple.',
+    'Hoja "Estadistica": tasa de averias de infancia (averias / total de instalaciones) calculada Global, por Agencia, por Producto y por Tecnico Instalador. Meta: no superar el ' + (META * 100).toFixed(2) + '%. Verde = cumple la meta, Rojo = no cumple.',
     '',
     'Hoja "Tiempo Infancia": promedio y mediana de dias transcurridos entre la instalacion y la reparacion de infancia, Global, por Causa y por Tecnico Instalador.',
     '',
@@ -684,7 +684,7 @@ async function main() {
   const highlightsTop = [...elegiblesHighlight].sort((a, b) => a.tasa - b.tasa).slice(0, 4).map((e) => {
     const cf = causaFrecuenteTecnico(e.label);
     return {
-      tecnico: e.label, tasa: +(e.tasa * 100).toFixed(1), total: e.total, infancia: e.infancia,
+      tecnico: e.label, tasa: +(e.tasa * 100).toFixed(2), total: e.total, infancia: e.infancia,
       nota: e.infancia === 0
         ? `Sin averias de infancia en ${e.total} instalaciones`
         : `Su causa mas frecuente: ${cf ? cf[0] : 'N/D'}${cf ? ` (${cf[1]} caso${cf[1] === 1 ? '' : 's'})` : ''}`,
@@ -693,7 +693,7 @@ async function main() {
   const highlightsBottom = [...elegiblesHighlight].sort((a, b) => b.tasa - a.tasa).slice(0, 4).map((e) => {
     const cf = causaFrecuenteTecnico(e.label);
     return {
-      tecnico: e.label, tasa: +(e.tasa * 100).toFixed(1), total: e.total, infancia: e.infancia,
+      tecnico: e.label, tasa: +(e.tasa * 100).toFixed(2), total: e.total, infancia: e.infancia,
       nota: `Su causa mas frecuente: ${cf ? cf[0] : 'N/D'}${cf ? ` (${cf[1]} caso${cf[1] === 1 ? '' : 's'})` : ''}`,
     };
   });
@@ -705,12 +705,12 @@ async function main() {
   const causaMasFrecuente = causasDist[0];
 
   const conclusiones = [
-    `Tasa global de averias de infancia: <strong>${(tasaGlobal * 100).toFixed(1)}%</strong> — ${tasaGlobal <= META ? '<span style="color:#1f7a45;font-weight:700;">CUMPLE</span>' : '<span style="color:#c0392b;font-weight:700;">NO CUMPLE</span>'} la meta del ${(META * 100).toFixed(1)}% (${statsGlobal.infancia} de ${statsGlobal.total} instalaciones tuvieron reparacion dentro de su infancia).`,
-    peorAgencia ? `La agencia con mayor tasa es <strong>${escapeHtml(peorAgencia.label)}</strong> con ${(peorAgencia.tasa * 100).toFixed(1)}% (${peorAgencia.infancia}/${peorAgencia.total}).` : '',
-    peorProducto ? `El producto con mayor tasa es <strong>${escapeHtml(peorProducto.label)}</strong> con ${(peorProducto.tasa * 100).toFixed(1)}%.` : '',
+    `Tasa global de averias de infancia: <strong>${(tasaGlobal * 100).toFixed(2)}%</strong> — ${tasaGlobal <= META ? '<span style="color:#1f7a45;font-weight:700;">CUMPLE</span>' : '<span style="color:#c0392b;font-weight:700;">NO CUMPLE</span>'} la meta del ${(META * 100).toFixed(2)}% (${statsGlobal.infancia} de ${statsGlobal.total} instalaciones tuvieron reparacion dentro de su infancia).`,
+    peorAgencia ? `La agencia con mayor tasa es <strong>${escapeHtml(peorAgencia.label)}</strong> con ${(peorAgencia.tasa * 100).toFixed(2)}% (${peorAgencia.infancia}/${peorAgencia.total}).` : '',
+    peorProducto ? `El producto con mayor tasa es <strong>${escapeHtml(peorProducto.label)}</strong> con ${(peorProducto.tasa * 100).toFixed(2)}%.` : '',
     causaMasFrecuente ? `La causa mas frecuente de la reparacion de infancia es <strong>${escapeHtml(causaMasFrecuente.label)}</strong> (${causaMasFrecuente.count} de ${inf.length} casos, ${causaMasFrecuente.pct.toFixed(0)}%).` : '',
-    peorTecnico ? `El tecnico instalador con mayor tasa de infancia (minimo 10 instalaciones) es <strong>${escapeHtml(peorTecnico.label)}</strong> con ${(peorTecnico.tasa * 100).toFixed(1)}% (${peorTecnico.infancia}/${peorTecnico.total}).` : '',
-    mejorTecnico ? `El mejor desempeno (minimo 10 instalaciones) es de <strong>${escapeHtml(mejorTecnico.label)}</strong> con ${(mejorTecnico.tasa * 100).toFixed(1)}%.` : '',
+    peorTecnico ? `El tecnico instalador con mayor tasa de infancia (minimo 10 instalaciones) es <strong>${escapeHtml(peorTecnico.label)}</strong> con ${(peorTecnico.tasa * 100).toFixed(2)}% (${peorTecnico.infancia}/${peorTecnico.total}).` : '',
+    mejorTecnico ? `El mejor desempeno (minimo 10 instalaciones) es de <strong>${escapeHtml(mejorTecnico.label)}</strong> con ${(mejorTecnico.tasa * 100).toFixed(2)}%.` : '',
     diasInf.length ? `En promedio, la reparacion de infancia ocurre a los <strong>${promedioGlobalDias.toFixed(1)} dias</strong> de la instalacion; el ${(pctDentro7 * 100).toFixed(0)}% ocurre dentro de la primera semana.` : '',
     mismoTotal ? `El <strong>${(mismoPctGlobal * 100).toFixed(0)}%</strong> de las averias de infancia fueron atendidas por el mismo tecnico que hizo la instalacion original.` : '',
   ].filter(Boolean);
@@ -739,9 +739,9 @@ async function main() {
   const variacionesTecnicos = tecnicoEntries
     .filter((e) => e.total >= 10 && tasaAnteriorPorTecnico[e.label] != null)
     .map((e) => {
-      const tasaActual = +(e.tasa * 100).toFixed(1);
+      const tasaActual = +(e.tasa * 100).toFixed(2);
       const tasaAnterior = tasaAnteriorPorTecnico[e.label];
-      return { tecnico: e.label, tasaActual, tasaAnterior, delta: +(tasaActual - tasaAnterior).toFixed(1) };
+      return { tecnico: e.label, tasaActual, tasaAnterior, delta: +(tasaActual - tasaAnterior).toFixed(2) };
     });
   // delta positivo = subio la tasa = empeoro (en este indicador, mas bajo es mejor).
   const masEmpeoraron = [...variacionesTecnicos].filter((v) => v.delta > 0).sort((a, b) => b.delta - a.delta).slice(0, 5);
@@ -755,24 +755,24 @@ async function main() {
     periodoSlug,
     archivos,
     agencias_lista: agenciasLista,
-    meta: +(META * 100).toFixed(1),
+    meta: +(META * 100).toFixed(2),
     totalInstalaciones: statsGlobal.total,
     totalInfancia: statsGlobal.infancia,
-    tasaGlobal: +(tasaGlobal * 100).toFixed(1),
+    tasaGlobal: +(tasaGlobal * 100).toFixed(2),
     diasPromedio: diasInf.length ? +promedioGlobalDias.toFixed(1) : null,
     diasMediana: diasInf.length ? mediana(diasInf) : null,
-    pctDentro7: +(pctDentro7 * 100).toFixed(1),
-    mismoPct: mismoTotal ? +(mismoPctGlobal * 100).toFixed(1) : null,
+    pctDentro7: +(pctDentro7 * 100).toFixed(2),
+    mismoPct: mismoTotal ? +(mismoPctGlobal * 100).toFixed(2) : null,
     mismoTotal,
-    agencias: agenciaEntries.map((e) => ({ agencia: e.label, total: e.total, infancia: e.infancia, tasa: +(e.tasa * 100).toFixed(1) })),
-    productos: productoEntries.map((e) => ({ producto: e.label, total: e.total, infancia: e.infancia, tasa: +(e.tasa * 100).toFixed(1) })),
-    causas: causasDist.map((c) => ({ causa: c.label, count: c.count, pct: +c.pct.toFixed(1) })),
+    agencias: agenciaEntries.map((e) => ({ agencia: e.label, total: e.total, infancia: e.infancia, tasa: +(e.tasa * 100).toFixed(2) })),
+    productos: productoEntries.map((e) => ({ producto: e.label, total: e.total, infancia: e.infancia, tasa: +(e.tasa * 100).toFixed(2) })),
+    causas: causasDist.map((c) => ({ causa: c.label, count: c.count, pct: +c.pct.toFixed(2) })),
     claves: clavesDist.map((c) => ({ clave: c.label, count: c.count, pct: +c.pct.toFixed(1) })),
     diasBuckets: buckets.map((b) => ({ label: b.label, count: b.count, pct: +b.pct.toFixed(1) })),
-    mismoPorCausa: Object.entries(mismoPorCausa).map(([causa, s]) => ({ causa, total: s.total, mismo: s.mismo, tasa: s.total ? +((s.mismo / s.total) * 100).toFixed(1) : 0 })),
+    mismoPorCausa: Object.entries(mismoPorCausa).map(([causa, s]) => ({ causa, total: s.total, mismo: s.mismo, tasa: s.total ? +((s.mismo / s.total) * 100).toFixed(2) : 0 })),
     tecnicos: tecnicoEntries.map((e) => ({
       tecnico: e.label, agencia: (metaTec[e.label] || {}).agencia || 'sin informacion',
-      total: e.total, infancia: e.infancia, tasa: +(e.tasa * 100).toFixed(1),
+      total: e.total, infancia: e.infancia, tasa: +(e.tasa * 100).toFixed(2),
       nps: npsPorTecnico[loginKey(e.label)] ?? null,
     })),
     labelMesAnterior: mesAnteriorInfo ? mesAnteriorInfo.label : null,
@@ -1213,12 +1213,12 @@ function crearEtiquetasPlugin(formatter, datasetIndex) {
   };
 }
 
-const metaGap = +(DATA.tasaGlobal - DATA.meta).toFixed(1);
+const metaGap = +(DATA.tasaGlobal - DATA.meta).toFixed(2);
 const metaSub = metaGap <= 0
   ? \`<span style="color:var(--promotor)">▼ \${Math.abs(metaGap)} pts bajo la meta (\${DATA.meta}%) — cumple</span>\`
   : \`<span style="color:var(--detractor)">▲ \${metaGap} pts sobre la meta (\${DATA.meta}%) — no cumple</span>\`;
 document.getElementById('kpiGrid').innerHTML = \`
-  <div class="kpi-card"><div class="label">Tasa Global de Infancia</div><div class="value hl">\${DATA.tasaGlobal}%</div><div class="sub">\${metaSub}</div></div>
+  <div class="kpi-card"><div class="label">Tasa Global de Infancia</div><div class="value hl">\${Number(DATA.tasaGlobal).toFixed(2)}%</div><div class="sub">\${metaSub}</div></div>
   <div class="kpi-card"><div class="label">Total Instalaciones</div><div class="value">\${DATA.totalInstalaciones}</div><div class="sub">Periodo \${DATA.periodo}</div></div>
   <div class="kpi-card"><div class="label">Averias de Infancia</div><div class="value">\${DATA.totalInfancia}</div><div class="sub">Instalaciones que fallaron temprano</div></div>
   <div class="kpi-card"><div class="label">Dias Prom. hasta la Infancia</div><div class="value">\${DATA.diasPromedio ?? '-'}</div><div class="sub">Mediana: \${DATA.diasMediana ?? '-'} dias · \${DATA.pctDentro7}% dentro de 7 dias</div></div>
@@ -1239,14 +1239,14 @@ new Chart(document.getElementById('chartAgencia'), {
 });
 let rowsAg = '<tr><th>Agencia</th><th>Tasa</th><th>vs. Meta</th><th>Instalaciones</th></tr>';
 DATA.agencias.slice().sort((a,b)=>a.tasa-b.tasa).forEach(a=>{
-  const gap = +(a.tasa - DATA.meta).toFixed(1);
+  const gap = +(a.tasa - DATA.meta).toFixed(2);
   const gapTxt = gap<=0 ? \`<span style="color:var(--promotor)">\${gap}</span>\` : \`<span style="color:var(--detractor)">+\${gap}</span>\`;
-  rowsAg += \`<tr><td>\${a.agencia}</td><td><span class="badge \${npsClass(a.tasa,DATA.meta)}">\${a.tasa}%</span></td><td>\${gapTxt}</td><td>\${a.total}</td></tr>\`;
+  rowsAg += \`<tr><td>\${a.agencia}</td><td><span class="badge \${npsClass(a.tasa,DATA.meta)}">\${Number(a.tasa).toFixed(2)}%</span></td><td>\${gapTxt}</td><td>\${a.total}</td></tr>\`;
 });
 document.getElementById('tablaAgencia').innerHTML = rowsAg;
 const agSobreMeta = DATA.agencias.filter(a=>a.tasa > DATA.meta);
 document.getElementById('agenciaCallout').innerHTML = agSobreMeta.length
-  ? \`<b>Sobre la meta:</b> \${agSobreMeta.map(a=>\`\${a.agencia} (\${a.tasa}%)\`).join(' y ')} supera el \${DATA.meta}% institucional.\`
+  ? \`<b>Sobre la meta:</b> \${agSobreMeta.map(a=>\`\${a.agencia} (\${Number(a.tasa).toFixed(2)}%)\`).join(' y ')} supera el \${DATA.meta}% institucional.\`
   : \`<b>Todas las agencias dentro de la meta</b> de \${DATA.meta}% este periodo.\`;
 
 new Chart(document.getElementById('chartProducto'), {
@@ -1263,11 +1263,11 @@ new Chart(document.getElementById('chartProducto'), {
 });
 let rowsPr = '<tr><th>Producto</th><th>Tasa</th><th>Infancia</th><th>Total</th></tr>';
 DATA.productos.slice().sort((a,b)=>b.tasa-a.tasa).forEach(p=>{
-  rowsPr += \`<tr><td>\${p.producto}</td><td><span class="badge \${npsClass(p.tasa,DATA.meta)}">\${p.tasa}%</span></td><td>\${p.infancia}</td><td>\${p.total}</td></tr>\`;
+  rowsPr += \`<tr><td>\${p.producto}</td><td><span class="badge \${npsClass(p.tasa,DATA.meta)}">\${Number(p.tasa).toFixed(2)}%</span></td><td>\${p.infancia}</td><td>\${p.total}</td></tr>\`;
 });
 document.getElementById('tablaProducto').innerHTML = rowsPr;
 const peorPr = DATA.productos.slice().sort((a,b)=>b.tasa-a.tasa)[0];
-document.getElementById('productoCallout').innerHTML = peorPr ? \`<b>Foco principal:</b> \${peorPr.producto} tiene la mayor tasa de infancia (\${peorPr.tasa}%).\` : '';
+document.getElementById('productoCallout').innerHTML = peorPr ? \`<b>Foco principal:</b> \${peorPr.producto} tiene la mayor tasa de infancia (\${Number(peorPr.tasa).toFixed(2)}%).\` : '';
 
 new Chart(document.getElementById('chartCausa'), {
   type: 'bar',
@@ -1279,7 +1279,7 @@ new Chart(document.getElementById('chartCausa'), {
   options: { indexAxis:'y', responsive:true, maintainAspectRatio:false, layout:{ padding:{ right:40 } }, plugins:{ legend:{ display:false } }, scales:{ x:{ min:0, title:{display:true,text:'% de casos'}, grid:{color:'rgba(20,50,80,0.06)'} } } }
 });
 let rowsCl = '<tr><th>Clave</th><th>Casos</th><th>%</th></tr>';
-DATA.claves.forEach(c=>{ rowsCl += \`<tr><td>\${c.clave}</td><td>\${c.count}</td><td>\${c.pct}%</td></tr>\`; });
+DATA.claves.forEach(c=>{ rowsCl += \`<tr><td>\${c.clave}</td><td>\${c.count}</td><td>\${Number(c.pct).toFixed(2)}%</td></tr>\`; });
 document.getElementById('tablaClave').innerHTML = rowsCl;
 
 new Chart(document.getElementById('chartDias'), {
@@ -1299,14 +1299,14 @@ document.getElementById('diasCallout').innerHTML =
 
 new Chart(document.getElementById('chartMismo'), {
   type: 'doughnut',
-  data: { labels: ['Mismo tecnico', 'Tecnico distinto'], datasets: [{ data: [DATA.mismoPct, +(100-DATA.mismoPct).toFixed(1)], backgroundColor: ['#c0392b','#1f7a45'], borderWidth:0 }] },
+  data: { labels: ['Mismo tecnico', 'Tecnico distinto'], datasets: [{ data: [DATA.mismoPct, +(100-DATA.mismoPct).toFixed(2)], backgroundColor: ['#c0392b','#1f7a45'], borderWidth:0 }] },
   options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{boxWidth:10} } }, cutout: '62%' }
 });
 let rowsMi = '<tr><th>Causa</th><th>% Mismo Tecnico</th><th>Casos</th></tr>';
-DATA.mismoPorCausa.forEach(m=>{ rowsMi += \`<tr><td>\${m.causa}</td><td><span class="badge \${m.tasa>=50?'lo':'hi'}">\${m.tasa}%</span></td><td>\${m.mismo}/\${m.total}</td></tr>\`; });
+DATA.mismoPorCausa.forEach(m=>{ rowsMi += \`<tr><td>\${m.causa}</td><td><span class="badge \${m.tasa>=50?'lo':'hi'}">\${Number(m.tasa).toFixed(2)}%</span></td><td>\${m.mismo}/\${m.total}</td></tr>\`; });
 document.getElementById('tablaMismo').innerHTML = rowsMi;
 document.getElementById('mismoCallout').innerHTML =
-  \`<b>\${DATA.mismoPct}%</b> de las averias de infancia fueron atendidas por el mismo tecnico que hizo la instalacion original.\`;
+  \`<b>\${Number(DATA.mismoPct).toFixed(2)}%</b> de las averias de infancia fueron atendidas por el mismo tecnico que hizo la instalacion original.\`;
 
 const agenciasOrden = DATA.agencias.slice().sort((a,b)=>b.total-a.total).map(a=>a.agencia);
 let tecnicosHtml = '';
@@ -1315,7 +1315,7 @@ agenciasOrden.forEach(agencia => {
   if (!tecsAg.length) return;
   let rowsTec = '<tr><th>#</th><th>Tecnico</th><th>Tasa</th><th>Instalaciones</th><th>Infancia</th><th>NPS</th></tr>';
   tecsAg.forEach((t,i)=>{
-    rowsTec += \`<tr><td>\${i+1}</td><td>\${titleCase(t.tecnico)}\${notaDesvinculado(t.tecnico)}</td><td><span class="badge \${npsClass(t.tasa,DATA.meta)}">\${t.tasa}%</span></td><td>\${t.total}</td><td>\${t.infancia}</td><td>\${t.nps != null ? t.nps+'%' : '—'}</td></tr>\`;
+    rowsTec += \`<tr><td>\${i+1}</td><td>\${titleCase(t.tecnico)}\${notaDesvinculado(t.tecnico)}</td><td><span class="badge \${npsClass(t.tasa,DATA.meta)}">\${Number(t.tasa).toFixed(2)}%</span></td><td>\${t.total}</td><td>\${t.infancia}</td><td>\${t.nps != null ? t.nps+'%' : '—'}</td></tr>\`;
   });
   tecnicosHtml += \`<div class="panel" style="margin-bottom:16px;">
     <div style="font-size:13px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">\${agencia} · \${tecsAg.length} tecnico\${tecsAg.length===1?'':'s'} (min. 10 instalaciones)</div>
@@ -1327,7 +1327,7 @@ document.getElementById('tecnicosPorAgencia').innerHTML = tecnicosHtml;
 function techCard(t, kind){
   const cls = kind==='top' ? 'hi' : 'lo';
   return \`<div class="tech-card \${kind==='top'?'top-card':'bottom-card'}">
-    <div class="tech-head"><span class="tech-name">\${titleCase(t.tecnico)}</span><span class="tech-nps \${cls}">\${t.tasa}%</span></div>
+    <div class="tech-head"><span class="tech-name">\${titleCase(t.tecnico)}</span><span class="tech-nps \${cls}">\${Number(t.tasa).toFixed(2)}%</span></div>
     <div class="tech-meta">\${t.total} instalaciones · \${t.infancia} averia\${t.infancia===1?'':'s'} de infancia</div>
     <div class="tech-quote">\${t.nota}</div>
   </div>\`;
@@ -1341,7 +1341,7 @@ function variacionCard(v, kind){
   const signo = v.delta > 0 ? '+' : '';
   return \`<div class="tech-card \${kind==='mejoro'?'top-card':'bottom-card'}">
     <div class="tech-head"><span class="tech-name">\${titleCase(v.tecnico)}</span><span class="tech-nps \${cls}">\${signo}\${v.delta}pts</span></div>
-    <div class="tech-meta">\${v.tasaAnterior}% → \${v.tasaActual}%</div>
+    <div class="tech-meta">\${Number(v.tasaAnterior).toFixed(2)}% → \${Number(v.tasaActual).toFixed(2)}%</div>
   </div>\`;
 }
 if ((DATA.masMejoraron && DATA.masMejoraron.length) || (DATA.masEmpeoraron && DATA.masEmpeoraron.length)) {

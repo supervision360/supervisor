@@ -155,7 +155,7 @@ function cargarNpsPorTecnico() {
     const total = candidatos.reduce((a, c) => a + c.total, 0);
     const p = candidatos.reduce((a, c) => a + c.P, 0);
     const d = candidatos.reduce((a, c) => a + c.D, 0);
-    resultado[key] = total ? +(((p - d) / total) * 100).toFixed(1) : null;
+    resultado[key] = total ? +(((p - d) / total) * 100).toFixed(2) : null;
   });
   return resultado;
 }
@@ -851,12 +851,12 @@ async function main() {
   const causaMasMismoTecnico = mismoCausaEntries[0];
 
   const observaciones = [
-    `Tasa global de reincidencia: <strong>${(tasaGlobal * 100).toFixed(1)}%</strong> — ${tasaGlobal <= META ? '<span class="ok">CUMPLE</span>' : '<span class="bad-text">NO CUMPLE</span>'} la meta del ${(META * 100).toFixed(0)}% (${statsGlobal.reincidencias} de ${statsGlobal.total} reparaciones reincidieron dentro de 30 dias).`,
-    peorAgencia ? `La agencia con mayor tasa es <strong>${escapeHtml(peorAgencia.label)}</strong> con ${(peorAgencia.tasa * 100).toFixed(1)}% (${peorAgencia.reincidencias}/${peorAgencia.total}).` : '',
-    peorCausa ? `La causa que mas reincide es <strong>${escapeHtml(peorCausa.label)}</strong> con ${(peorCausa.tasa * 100).toFixed(1)}%.` : '',
-    peorSubcausa ? `La subcausa mas critica (con al menos 5 casos) es <strong>${escapeHtml(peorSubcausa.label)}</strong> con ${(peorSubcausa.tasa * 100).toFixed(1)}%.` : '',
-    peorTecnico ? `El tecnico con mayor tasa de reincidencia (minimo 10 reparaciones) es <strong>${escapeHtml(peorTecnico.label)}</strong> con ${(peorTecnico.tasa * 100).toFixed(1)}% (${peorTecnico.reincidencias}/${peorTecnico.total}).` : '',
-    mejorTecnico ? `El mejor desempeno (minimo 10 reparaciones) es de <strong>${escapeHtml(mejorTecnico.label)}</strong> con ${(mejorTecnico.tasa * 100).toFixed(1)}%.` : '',
+    `Tasa global de reincidencia: <strong>${(tasaGlobal * 100).toFixed(2)}%</strong> — ${tasaGlobal <= META ? '<span class="ok">CUMPLE</span>' : '<span class="bad-text">NO CUMPLE</span>'} la meta del ${(META * 100).toFixed(0)}% (${statsGlobal.reincidencias} de ${statsGlobal.total} reparaciones reincidieron dentro de 30 dias).`,
+    peorAgencia ? `La agencia con mayor tasa es <strong>${escapeHtml(peorAgencia.label)}</strong> con ${(peorAgencia.tasa * 100).toFixed(2)}% (${peorAgencia.reincidencias}/${peorAgencia.total}).` : '',
+    peorCausa ? `La causa que mas reincide es <strong>${escapeHtml(peorCausa.label)}</strong> con ${(peorCausa.tasa * 100).toFixed(2)}%.` : '',
+    peorSubcausa ? `La subcausa mas critica (con al menos 5 casos) es <strong>${escapeHtml(peorSubcausa.label)}</strong> con ${(peorSubcausa.tasa * 100).toFixed(2)}%.` : '',
+    peorTecnico ? `El tecnico con mayor tasa de reincidencia (minimo 10 reparaciones) es <strong>${escapeHtml(peorTecnico.label)}</strong> con ${(peorTecnico.tasa * 100).toFixed(2)}% (${peorTecnico.reincidencias}/${peorTecnico.total}).` : '',
+    mejorTecnico ? `El mejor desempeno (minimo 10 reparaciones) es de <strong>${escapeHtml(mejorTecnico.label)}</strong> con ${(mejorTecnico.tasa * 100).toFixed(2)}%.` : '',
     diasReit.length ? `En promedio, una reincidencia ocurre a los <strong>${promedioGlobalDias.toFixed(1)} dias</strong>; el ${(pctDentro7 * 100).toFixed(0)}% ocurre dentro de la primera semana.` : '',
     tecnicoMasRapido ? `<strong>${escapeHtml(tecnicoMasRapido.label)}</strong> tiene el promedio mas bajo de dias hasta reincidir (${tecnicoMasRapido.promedio.toFixed(1)} dias en ${tecnicoMasRapido.casos} casos) — posible senal de reparaciones que no resuelven el problema de fondo.` : '',
     mismoGlobalTotal ? `De los casos con dato completo, el <strong>${(mismoPctGlobal * 100).toFixed(0)}%</strong> de las reincidencias fueron re-atendidas por el mismo tecnico que hizo la reparacion original.` : '',
@@ -887,7 +887,7 @@ async function main() {
   const highlightsTop = [...elegiblesHighlight].sort((a, b) => a.tasa - b.tasa).slice(0, 4).map((e) => {
     const cf = causaFrecuenteTecnico(e.label);
     return {
-      tecnico: e.label, tasa: +(e.tasa * 100).toFixed(1), total: e.total, reincidencias: e.reincidencias,
+      tecnico: e.label, tasa: +(e.tasa * 100).toFixed(2), total: e.total, reincidencias: e.reincidencias,
       nota: e.reincidencias === 0
         ? `Sin reincidencias en ${e.total} reparaciones`
         : `Su reincidencia mas frecuente: ${cf ? cf[0] : 'N/D'}${cf ? ` (${cf[1]} caso${cf[1] === 1 ? '' : 's'})` : ''}`,
@@ -896,7 +896,7 @@ async function main() {
   const highlightsBottom = [...elegiblesHighlight].sort((a, b) => b.tasa - a.tasa).slice(0, 4).map((e) => {
     const cf = causaFrecuenteTecnico(e.label);
     return {
-      tecnico: e.label, tasa: +(e.tasa * 100).toFixed(1), total: e.total, reincidencias: e.reincidencias,
+      tecnico: e.label, tasa: +(e.tasa * 100).toFixed(2), total: e.total, reincidencias: e.reincidencias,
       nota: `Su reincidencia mas frecuente: ${cf ? cf[0] : 'N/D'}${cf ? ` (${cf[1]} caso${cf[1] === 1 ? '' : 's'})` : ''}`,
     };
   });
@@ -925,9 +925,9 @@ async function main() {
   const variacionesTecnicos = tecnicoEntries
     .filter((e) => e.total >= 10 && tasaAnteriorPorTecnico[e.label] != null)
     .map((e) => {
-      const tasaActual = +(e.tasa * 100).toFixed(1);
+      const tasaActual = +(e.tasa * 100).toFixed(2);
       const tasaAnterior = tasaAnteriorPorTecnico[e.label];
-      return { tecnico: e.label, tasaActual, tasaAnterior, delta: +(tasaActual - tasaAnterior).toFixed(1) };
+      return { tecnico: e.label, tasaActual, tasaAnterior, delta: +(tasaActual - tasaAnterior).toFixed(2) };
     });
   // delta positivo = subio la tasa = empeoro (en este indicador, mas bajo es mejor).
   const masEmpeoraron = [...variacionesTecnicos].filter((v) => v.delta > 0).sort((a, b) => b.delta - a.delta).slice(0, 5);
@@ -944,20 +944,20 @@ async function main() {
     meta: +(META * 100).toFixed(0),
     totalReparaciones: statsGlobal.total,
     totalReincidencias: statsGlobal.reincidencias,
-    tasaGlobal: +(tasaGlobal * 100).toFixed(1),
+    tasaGlobal: +(tasaGlobal * 100).toFixed(2),
     diasPromedio: diasReit.length ? +promedioGlobalDias.toFixed(1) : null,
     diasMediana: diasReit.length ? mediana(diasReit) : null,
-    pctDentro7: +(pctDentro7 * 100).toFixed(1),
-    mismoPct: mismoGlobalTotal ? +(mismoPctGlobal * 100).toFixed(1) : null,
+    pctDentro7: +(pctDentro7 * 100).toFixed(2),
+    mismoPct: mismoGlobalTotal ? +(mismoPctGlobal * 100).toFixed(2) : null,
     mismoTotal: mismoGlobalTotal,
-    agencias: agenciaEntries.map((e) => ({ agencia: e.label, total: e.total, reincidencias: e.reincidencias, tasa: +(e.tasa * 100).toFixed(1) })),
-    causas: causaEntries.map((e) => ({ causa: e.label, total: e.total, reincidencias: e.reincidencias, tasa: +(e.tasa * 100).toFixed(1) })),
-    subcausas: subcausaEntries.map((e) => ({ subcausa: e.label, total: e.total, reincidencias: e.reincidencias, tasa: +(e.tasa * 100).toFixed(1) })),
+    agencias: agenciaEntries.map((e) => ({ agencia: e.label, total: e.total, reincidencias: e.reincidencias, tasa: +(e.tasa * 100).toFixed(2) })),
+    causas: causaEntries.map((e) => ({ causa: e.label, total: e.total, reincidencias: e.reincidencias, tasa: +(e.tasa * 100).toFixed(2) })),
+    subcausas: subcausaEntries.map((e) => ({ subcausa: e.label, total: e.total, reincidencias: e.reincidencias, tasa: +(e.tasa * 100).toFixed(2) })),
     diasBuckets: buckets.map((b) => ({ label: b.label, count: b.count, pct: +b.pct.toFixed(1) })),
-    mismoPorCausa: mismoCausaEntries.map((e) => ({ causa: e.label, total: e.total, mismo: e.mismo, tasa: +(e.tasa * 100).toFixed(1) })),
+    mismoPorCausa: mismoCausaEntries.map((e) => ({ causa: e.label, total: e.total, mismo: e.mismo, tasa: +(e.tasa * 100).toFixed(2) })),
     tecnicos: tecnicoEntries.map((e) => ({
       tecnico: e.label, agencia: (metaTec[e.label] || {}).agencia || 'sin informacion',
-      total: e.total, reincidencias: e.reincidencias, tasa: +(e.tasa * 100).toFixed(1),
+      total: e.total, reincidencias: e.reincidencias, tasa: +(e.tasa * 100).toFixed(2),
       nps: npsPorTecnico[loginKey(e.label)] ?? null,
     })),
     labelMesAnterior: mesAnteriorInfo ? mesAnteriorInfo.label : null,
@@ -1397,12 +1397,12 @@ function crearEtiquetasPlugin(formatter, datasetIndex) {
 }
 
 // ---- KPI cards ----
-const metaGap = +(DATA.tasaGlobal - DATA.meta).toFixed(1);
+const metaGap = +(DATA.tasaGlobal - DATA.meta).toFixed(2);
 const metaSub = metaGap <= 0
   ? \`<span style="color:var(--promotor)">▼ \${Math.abs(metaGap)} pts bajo la meta (\${DATA.meta}%) — cumple</span>\`
   : \`<span style="color:var(--detractor)">▲ \${metaGap} pts sobre la meta (\${DATA.meta}%) — no cumple</span>\`;
 document.getElementById('kpiGrid').innerHTML = \`
-  <div class="kpi-card"><div class="label">Tasa Global de Reincidencia</div><div class="value hl">\${DATA.tasaGlobal}%</div><div class="sub">\${metaSub}</div></div>
+  <div class="kpi-card"><div class="label">Tasa Global de Reincidencia</div><div class="value hl">\${Number(DATA.tasaGlobal).toFixed(2)}%</div><div class="sub">\${metaSub}</div></div>
   <div class="kpi-card"><div class="label">Total Reparaciones</div><div class="value">\${DATA.totalReparaciones}</div><div class="sub">Periodo \${DATA.periodo}</div></div>
   <div class="kpi-card"><div class="label">Reincidencias (30d)</div><div class="value">\${DATA.totalReincidencias}</div><div class="sub">Reparaciones que volvieron a fallar</div></div>
   <div class="kpi-card"><div class="label">Dias Prom. hasta Reitero</div><div class="value">\${DATA.diasPromedio ?? '-'}</div><div class="sub">Mediana: \${DATA.diasMediana ?? '-'} dias · \${DATA.pctDentro7}% dentro de 7 dias</div></div>
@@ -1429,14 +1429,14 @@ new Chart(document.getElementById('chartAgencia'), {
 });
 let rowsAg = '<tr><th>Agencia</th><th>Tasa</th><th>vs. Meta</th><th>Reparaciones</th></tr>';
 DATA.agencias.slice().sort((a,b)=>a.tasa-b.tasa).forEach(a=>{
-  const gap = +(a.tasa - DATA.meta).toFixed(1);
+  const gap = +(a.tasa - DATA.meta).toFixed(2);
   const gapTxt = gap<=0 ? \`<span style="color:var(--promotor)">\${gap}</span>\` : \`<span style="color:var(--detractor)">+\${gap}</span>\`;
-  rowsAg += \`<tr><td>\${a.agencia}</td><td><span class="badge \${npsClass(a.tasa,DATA.meta)}">\${a.tasa}%</span></td><td>\${gapTxt}</td><td>\${a.total}</td></tr>\`;
+  rowsAg += \`<tr><td>\${a.agencia}</td><td><span class="badge \${npsClass(a.tasa,DATA.meta)}">\${Number(a.tasa).toFixed(2)}%</span></td><td>\${gapTxt}</td><td>\${a.total}</td></tr>\`;
 });
 document.getElementById('tablaAgencia').innerHTML = rowsAg;
 const agBajoMeta = DATA.agencias.filter(a=>a.tasa > DATA.meta);
 document.getElementById('agenciaCallout').innerHTML = agBajoMeta.length
-  ? \`<b>Sobre la meta:</b> \${agBajoMeta.map(a=>\`\${a.agencia} (\${a.tasa}%)\`).join(' y ')} supera el \${DATA.meta}% institucional.\`
+  ? \`<b>Sobre la meta:</b> \${agBajoMeta.map(a=>\`\${a.agencia} (\${Number(a.tasa).toFixed(2)}%)\`).join(' y ')} supera el \${DATA.meta}% institucional.\`
   : \`<b>Todas las agencias dentro de la meta</b> de \${DATA.meta}% este periodo.\`;
 
 // ---- Chart 02: Causa ----
@@ -1459,12 +1459,12 @@ new Chart(document.getElementById('chartCausa'), {
 });
 let rowsCa = '<tr><th>Causa</th><th>Tasa</th><th>Reincidencias</th><th>Total</th></tr>';
 DATA.causas.slice().sort((a,b)=>b.tasa-a.tasa).forEach(c=>{
-  rowsCa += \`<tr><td>\${c.causa}</td><td><span class="badge \${npsClass(c.tasa,DATA.meta)}">\${c.tasa}%</span></td><td>\${c.reincidencias}</td><td>\${c.total}</td></tr>\`;
+  rowsCa += \`<tr><td>\${c.causa}</td><td><span class="badge \${npsClass(c.tasa,DATA.meta)}">\${Number(c.tasa).toFixed(2)}%</span></td><td>\${c.reincidencias}</td><td>\${c.total}</td></tr>\`;
 });
 document.getElementById('tablaCausa').innerHTML = rowsCa;
 const peorCausaC = DATA.causas.slice().sort((a,b)=>b.tasa-a.tasa)[0];
 document.getElementById('causaCallout').innerHTML = peorCausaC
-  ? \`<b>Foco principal:</b> \${peorCausaC.causa} tiene la mayor tasa de reincidencia (\${peorCausaC.tasa}%, \${peorCausaC.reincidencias} de \${peorCausaC.total} reparaciones).\`
+  ? \`<b>Foco principal:</b> \${peorCausaC.causa} tiene la mayor tasa de reincidencia (\${Number(peorCausaC.tasa).toFixed(2)}%, \${peorCausaC.reincidencias} de \${peorCausaC.total} reparaciones).\`
   : '';
 
 // ---- Chart 03: Subcausa ----
@@ -1518,7 +1518,7 @@ new Chart(document.getElementById('chartMismo'), {
   type: 'doughnut',
   data: {
     labels: ['Mismo tecnico', 'Tecnico distinto'],
-    datasets: [{ data: [DATA.mismoPct, +(100-DATA.mismoPct).toFixed(1)], backgroundColor: ['#c0392b','#1f7a45'], borderWidth:0 }]
+    datasets: [{ data: [DATA.mismoPct, +(100-DATA.mismoPct).toFixed(2)], backgroundColor: ['#c0392b','#1f7a45'], borderWidth:0 }]
   },
   options: {
     responsive:true, maintainAspectRatio:false,
@@ -1528,11 +1528,11 @@ new Chart(document.getElementById('chartMismo'), {
 });
 let rowsMi = '<tr><th>Causa</th><th>% Mismo Tecnico</th><th>Casos</th></tr>';
 DATA.mismoPorCausa.forEach(m=>{
-  rowsMi += \`<tr><td>\${m.causa}</td><td><span class="badge \${m.tasa>=50?'lo':'hi'}">\${m.tasa}%</span></td><td>\${m.mismo}/\${m.total}</td></tr>\`;
+  rowsMi += \`<tr><td>\${m.causa}</td><td><span class="badge \${m.tasa>=50?'lo':'hi'}">\${Number(m.tasa).toFixed(2)}%</span></td><td>\${m.mismo}/\${m.total}</td></tr>\`;
 });
 document.getElementById('tablaMismo').innerHTML = rowsMi;
 document.getElementById('mismoCallout').innerHTML =
-  \`<b>\${DATA.mismoPct}%</b> de las reincidencias con dato completo fueron re-atendidas por el mismo tecnico que hizo la reparacion original — señal de que no resolvio el problema a la primera.\`;
+  \`<b>\${Number(DATA.mismoPct).toFixed(2)}%</b> de las reincidencias con dato completo fueron re-atendidas por el mismo tecnico que hizo la reparacion original — señal de que no resolvio el problema a la primera.\`;
 
 // ---- Tabla: Tecnicos por agencia ----
 const agenciasOrden = DATA.agencias.slice().sort((a,b)=>b.total-a.total).map(a=>a.agencia);
@@ -1545,7 +1545,7 @@ agenciasOrden.forEach(agencia => {
     rowsTec += \`<tr>
       <td>\${i+1}</td>
       <td>\${titleCase(t.tecnico)}\${notaDesvinculado(t.tecnico)}</td>
-      <td><span class="badge \${npsClass(t.tasa,DATA.meta)}">\${t.tasa}%</span></td>
+      <td><span class="badge \${npsClass(t.tasa,DATA.meta)}">\${Number(t.tasa).toFixed(2)}%</span></td>
       <td>\${t.total}</td>
       <td>\${t.reincidencias}</td>
       <td>\${t.nps != null ? t.nps+'%' : '—'}</td>
@@ -1562,7 +1562,7 @@ document.getElementById('tecnicosPorAgencia').innerHTML = tecnicosHtml;
 function techCard(t, kind){
   const cls = kind==='top' ? 'hi' : 'lo';
   return \`<div class="tech-card \${kind==='top'?'top-card':'bottom-card'}">
-    <div class="tech-head"><span class="tech-name">\${titleCase(t.tecnico)}</span><span class="tech-nps \${cls}">\${t.tasa}%</span></div>
+    <div class="tech-head"><span class="tech-name">\${titleCase(t.tecnico)}</span><span class="tech-nps \${cls}">\${Number(t.tasa).toFixed(2)}%</span></div>
     <div class="tech-meta">\${t.total} reparaciones · \${t.reincidencias} reincidencia\${t.reincidencias===1?'':'s'}</div>
     <div class="tech-quote">\${t.nota}</div>
   </div>\`;
@@ -1576,7 +1576,7 @@ function variacionCard(v, kind){
   const signo = v.delta > 0 ? '+' : '';
   return \`<div class="tech-card \${kind==='mejoro'?'top-card':'bottom-card'}">
     <div class="tech-head"><span class="tech-name">\${titleCase(v.tecnico)}</span><span class="tech-nps \${cls}">\${signo}\${v.delta}pts</span></div>
-    <div class="tech-meta">\${v.tasaAnterior}% → \${v.tasaActual}%</div>
+    <div class="tech-meta">\${Number(v.tasaAnterior).toFixed(2)}% → \${Number(v.tasaActual).toFixed(2)}%</div>
   </div>\`;
 }
 if ((DATA.masMejoraron && DATA.masMejoraron.length) || (DATA.masEmpeoraron && DATA.masEmpeoraron.length)) {

@@ -1,5 +1,5 @@
 // Analisis de reparaciones reiteradas (reincidencias dentro de 30 dias)
-// Lee el CSV "p23-averias-reiteradas..._COBRA_...csv" desde la carpeta bbdd\
+// Lee el CSV "p75-Averias-Primer-reitero..._COBRA_...csv" desde la carpeta bbdd\
 // (subcarpeta de esta misma carpeta) y genera un Excel con el detalle:
 // 1ra reparacion (tecnico, clave de cierre, causa) vs 2da reparacion / reitero
 // (tecnico, clave de cierre, causa) y los dias transcurridos entre ambas.
@@ -22,13 +22,13 @@ function encontrarCsvOrigen() {
   }
   const candidatos = fs
     .readdirSync(carpetaBbdd)
-    .filter((f) => /^p23-averias-reiteradas.*COBRA.*\.csv$/i.test(f))
+    .filter((f) => /^p75-Averias-Primer-reitero.*COBRA.*\.csv$/i.test(f))
     .map((f) => ({ nombre: f, mtime: fs.statSync(path.join(carpetaBbdd, f)).mtimeMs }))
     .sort((a, b) => b.mtime - a.mtime);
 
   if (candidatos.length === 0) {
     throw new Error(
-      'No se encontro ningun archivo "p23-averias-reiteradas..._COBRA_....csv" en ' + carpetaBbdd
+      'No se encontro ningun archivo "p75-Averias-Primer-reitero..._COBRA_....csv" en ' + carpetaBbdd
     );
   }
   return path.join(carpetaBbdd, candidatos[0].nombre);
